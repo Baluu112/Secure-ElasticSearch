@@ -1,0 +1,80 @@
+You can choose to use any scripting language to automate (great if you could do in Ansible/ Terraform). 
+Use the free-tier resources from AWS. Feel free to comment your code and/or put detailed information in the instructions. 
+The exercise will be 2.5 hours. 
+ 
+ 
+## Following is the goals of the exercise: 
+1. Demonstrate your hands-on skills, you can code for building cloud hosted solution 
+2. Demonstrate that you can think of other cross-cutting-concerns like security 
+3. A nice segue to our discussion after you submit the code 
+
+## What we are expecting: 
+1. A link to github repo (or a zip/tarball) with code that accomplishes: 
+=> https://github.com/milindchawre/automation/tree/master/assignments/secure-elasticsearch
+a) Brings up an AWS instance 
+b) Installs ElasticSearch configured in a way that requires credentials and provides encrypted communication 
+c) Demonstrates that it is functioning 
+ 
+ 
+2. Instructions with: 
+
+a) A short description of your solution describing your choices and why did you make them
+This repository brings single node elasticsearch cluster on AWS with xpack security module enabled. All communications are encrypted and requires appropriate credentials to access its api. It also configures kibana with security enabled. The entire cluster is dockerized.
+=> Features
+- [xpack](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-xpack.html) security enabled
+- RAID0 of 3 EBS volume as storage for elaticsearch, this overall improves IOPS.
+- Support newer storage type like [NVME](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html) volumes.
+- Elasticsearch monitoring enabled on kibana.
+- Completely automated using terraform and ansible. Cluster state is stored remotely in s3 bucket and terraform lock support using dyanamoDB.
+
+
+b) Resources, if any, that you consulted to arrive at the final solution 
+https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-xpack.html
+https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+https://www.elastic.co/guide/en/kibana/current/docker.html
+
+c) How long did you spend on the exercise, and if possible, short feedback about the exercise 
+=> 4-5 hrs (Most of the time was spend in iteratively making code changes in terraform and testing those out, which ultimately means bringing up the entire cluster to test & iteratively develop.) Overall the problem statement is quite good to access hands-on skills like scripting, automation, security, etc.
+
+3. Must use AWS free tier, however, if you’re using any additional services, please mention them in the instructions 
+=> Mostly uses aws free tier resources, but not yet completely sure as I tried it on non-trial account.
+
+4. ElasticSearch access and communication must be secure 
+=> Xpack security module is enabled to secure overall communication. Also credentials are required to access api's.
+
+## Bonus if you extend your code to create a cluster of 3 ElasticSearch nodes 
+Some answers we are looking: 
+1. What did you choose to automate the provisioning and bootstrapping of the instance? Why? 
+
+2. How did you choose to secure ElasticSearch? Why? 
+=> Used xpack security module for security, as its the official offering for security from elastic. Also its open source in elastic 7.x series.
+
+3. How would you monitor this instance? What metrics would you monitor? 
+=> Monitoring is at different levels:
+- Node level monitoring: using aws cloudwatch or using any custom monitoring tool like prometheus using node exporter with alerting configured using alertmanager or aws SNS.
+- Elasticsearch monitoring: Using inbuilt xpack monitoring feature or using elasticsearch exporter for prometheus with alerting configured using alertmanager or aws SNS.
+
+4. Could you extend your solution to launch a secure cluster of ElasticSearch nodes? What would need to change to support this use case? 
+- It need few code changes to extend it to full multi-node cluster. Mostly the changes from terraform end.
+
+5. Could you extend your solution to replace a running ElasticSearch instance with little or no downtime? How?
+- I can think of rolling upgrades for elasticsearch cluster, one node at a time. https://www.elastic.co/guide/en/elasticsearch/reference/current/rolling-upgrades.html
+Overall it needs quite an efforts, its not the only way.
+ 
+6. Was it a priority to make your code well structured, extensible, and reusable? 
+- There are few things which I listed in Future Roadmap section below.
+
+7. What sacrifices did you make due to time? 
+- Most of them are listed in Future Roadmap section below.
+
+### Future RoadMap
+- Move ElasticSearch and Kibana from public subnet to private subnet and expose it through either some reverse proxy running in public subnet or through an aws load balancer as mentioned [here](https://aws.amazon.com/premiumsupport/knowledge-center/public-load-balancer-private-ec2/).
+- Dockerize the entire code, so that there is no need to install specific version of terraform, ansible and python on user machine. Only Docker installation should be sufficient.
+- Extend the elasticsearch cluster from single node to multi-node.
+- Cloudinit is used to configure few things like docker installation, elasticsearch config creation, etc. Move these things to ansible and keep things like RAID0 creation with cloudinit.
+- The ssl certificate are not from trusted certificate authority. Make use of tools like lets-encrypt to created trusted ssl certificates. https://letsencrypt.org/
+- Convert ansible playbooks into ansible roles.
+- Configure extra layer of security by setting up NACL rules at subnet level. https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
+- Harden the aws linux instance. More info here: https://dev-sec.io/baselines/linux/
+- Make use of some dns like route53 rather than using public-ip directly to access kibana and elasticsearch.
+- Write a shell script that automates the cluster creation steps.
