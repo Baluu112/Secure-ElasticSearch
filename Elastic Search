@@ -10,7 +10,7 @@ The exercise will be 2.5 hours.
 
 ## What we are expecting: 
 1. A link to github repo (or a zip/tarball) with code that accomplishes: 
-=> https://github.com/milindchawre/automation/tree/master/assignments/secure-elasticsearch
+=> https://github.com/Baluu112/automation.git
 a) Brings up an AWS instance 
 b) Installs ElasticSearch configured in a way that requires credentials and provides encrypted communication 
 c) Demonstrates that it is functioning 
